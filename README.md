@@ -15,3 +15,5 @@ At this stage the robot is fully functioning and I further tested it's dynamics 
 While developping the robot I was working in parallel on a LIDAR sensor equivalent. I bought a ToF laser sensor (Tof 10120) and mounted it on a servo (mg90s). The sensor is calibrated by checking the data and creating a 2D LIDAR map on PYTHON. ![alt text](https://github.com/naderriman/SelfBalancingRobot/blob/main/delay20.png)
 
 This sensor is interfaced on another Arduino (UNO), the calculations are made on the arduino and the data is sent to the Arduino MEGA through I2C communication.
+
+https://drive.google.com/file/d/1FbCWZzdI4-OJxm3HUgEuWHK8L_r26iID/view?usp=drivesdk
