@@ -1,79 +1,161 @@
-/* This code is to use with ToF10120 to measure distance in (mm) and shows it on the Serial monitor using IÂ²c inteface
- * Modified and adapted from a code found on some dodgy chinese website
- * Refer to www.SurtrTech.com for more details
- */
-
 #include <Wire.h>
 #include <Servo.h>
 Servo myservo;
-bool ServoDirection=0;
+byte Turn = 2;
+unsigned int case0Array[4];
+unsigned int case1Array[5];
+unsigned int myArray[11];
+byte index;
+byte var;
+long arraySum;
 unsigned char ok_flag;
 unsigned char fail_flag;
 
 unsigned short lenth_val = 0;
 unsigned char i2c_rx_buf[16];
-unsigned char dirsend_flag=0;
-int pos = 0; 
- int x=0;
+unsigned char dirsend_flag = 0;
+//unsigned int limits=[];
+int pos = 80;
+int x = 0;
 void setup() {
-  myservo.attach(9,400,2300);
-  Wire.begin(); 
-  Serial.begin(9600,SERIAL_8N1); 
-//  printf_begin();          
+  myservo.attach(11, 350, 2200);
+  Wire.begin(9);
+  Wire.onRequest(requestEvent);
+  //  Serial.begin(38400, SERIAL_8N1);
+  //  printf_begin();
 
 }
 
 void loop() {
-  
 
-   
-   
-    if (ServoDirection==0 && pos<180){
-    pos=pos+2;
-    myservo.write(pos); 
-     x=ReadDistance();
-     
-//   Serial.print(" Distance : ") ;
-    Serial.print(x);
-//     Serial.print(" mm at angle:  ") ;
-      Serial.print("x");
-      Serial.println(pos);
-    
+  //  StartScan(85 , 1);
+  //  double mean = average();
+
+  switch (var) {
+    case 0:
+
+      StartScan(60 , 2);
+      case0Array[0] = average();
+      StartScan(80 , 2);
+      case0Array[1] = average();
+      StartScan(100 , 2);
+      case0Array[2] = average();
+      if (case0Array[0] > case0Array[1] && case0Array[0] > case0Array[2] ) {
+        //        Serial.println("TurnslightRight");
+        Turn = 1;
+        if (case0Array[0] < 600) {
+          //          Serial.println("stop");
+          var = 1;
+
+        } else if (case0Array[0] > 1000) {
+
+          Turn = 2;
+          var = 5;
+        }
+      }
+      else if (case0Array[2] > case0Array[1]) {
+
+        Turn = 3;
+        if (case0Array[2] < 600) {
+          //          Serial.println("stop");
+          var = 1;
+
+        } else if (case0Array[2] > 1100) {
+
+          Turn = 2;
+          var = 5;
+        }
+      }
+      else {
+        var = 5;
+        Turn = 2;
+        if (case0Array[1] < 600) {
+
+          var = 1;
+
+        } else if (case0Array[1] > 1100) {
+
+
+          var = 5;
+        }
+      }
+
+
+      break;
+    case 1:
+      StartScan(30 , 3);
+      case1Array[0] = average();
+      StartScan(60 , 3);
+      case1Array[1] = average();
+      StartScan(90 , 3);
+      case1Array[2] = average();
+      StartScan(120 , 3);
+      case1Array[3] = average();
+      if (case1Array[0] > case1Array[1] && case1Array[0] > case1Array[2] && case1Array[0] > case1Array[3]) {
+        //        Serial.println("TurnstronglyRight");
+        Turn = 0;
+        if (case1Array[2] > 500) {
+
+          var = 0;
+
+        }
+      }
+      else if ( case1Array[1] > case1Array[2] && case1Array[1] > case1Array[3]) {
+        //        Serial.println("TurnslightRight");
+        Turn = 1;
+        if (case1Array[1] > 500) {
+
+          var = 0;
+
+        }
+      }
+      else if ( case1Array[2] > case1Array[3] ) {
+        //        Serial.println("TurnslightLeft");
+        Turn = 3;
+        if (case1Array[2] > 400) {
+
+          var = 0;
+
+        }
+      }
+      else {
+        //        Serial.println("TurnsStrongLeft");
+        Turn = 4;
+        if (case1Array[3] > 400) {
+          //          Serial.println("rawwe2a shway");
+          var = 0;
+
+        }
+
+      }
+
+      delay(700);
+      break;
+    default:
+      StartScan(80 , 2);
+      double mean = average();
+
+
+      if (mean < 1100 && mean > 500) {
+        //        Serial.println("rawwe2a shway");
+        var = 0;
+      } else if (mean < 500) {
+        //        Serial.println("STOP");
+        var = 1;
+      }
+      //      Serial.println("jelis rayyis");
+      break;
   }
-//  else if(ServoDirection==1 && pos>0){
-//    pos=pos-2;
-//    myservo.write(pos);
-//     x=ReadDistance();
-////   Serial.print(" Distance : ") ;
-//    Serial.print(x);
-////     Serial.print(" mm at angle:  ") ;
-//      Serial.print("x");
-//      Serial.println(pos);
-//    
-//  }
-  else{
-//    ServoDirection=!ServoDirection;
-  pos=0;
-  }
-  
+
+
+
 }
-//
-//int serial_putc( char c, struct __file * )
-//{
-//  Serial.write( c );
-//  return c;
-//}
-//
-//void printf_begin(void)
-//{
-//  fdevopen( &serial_putc, 0 );
-//}
 
 
 
-void SensorRead(unsigned char addr,unsigned char* datbuf,unsigned char cnt) 
+void SensorRead(unsigned char addr, unsigned char* datbuf, unsigned char cnt)
 {
-  unsigned short result=0;
+  unsigned short result = 0;
   // step 1: instruct sensor to read echoes
   Wire.beginTransmission(82); // transmit to device #82 (0x52)
   // the address specified in the datasheet is 164 (0xa4)
@@ -81,7 +163,7 @@ void SensorRead(unsigned char addr,unsigned char* datbuf,unsigned char cnt)
   Wire.write(byte(addr));      // sets distance data address (addr)
   Wire.endTransmission();      // stop transmitting
   // step 2: wait for readings to happen
-delayMicroseconds(100);                  // datasheet suggests at least 30uS
+  delayMicroseconds(100);                  // datasheet suggests at least 30uS
   // step 3: request reading from sensor
   Wire.requestFrom(82, cnt);    // request cnt bytes from slave device #82 (0x52)
   // step 5: receive reading from sensor
@@ -91,11 +173,49 @@ delayMicroseconds(100);                  // datasheet suggests at least 30uS
   }
 }
 
-int ReadDistance(){
-    SensorRead(0x00,i2c_rx_buf,2);
-    lenth_val=i2c_rx_buf[0];
-    lenth_val=lenth_val<<8;
-    lenth_val|=i2c_rx_buf[1];
-   delay(10); 
-    return lenth_val;
+int ReadDistance() {
+  SensorRead(0x00, i2c_rx_buf, 2);
+  lenth_val = i2c_rx_buf[0];
+  lenth_val = lenth_val << 8;
+  lenth_val |= i2c_rx_buf[1];
+  delay(20);
+  return lenth_val;
+}
+double average() {
+  float arraySum = 0;
+  unsigned int len = sizeof(myArray) / sizeof( myArray[0]);
+  // Serial.println(sizeof(myArray));
+  for (index = 0; index < len; index++)
+  {
+    arraySum += myArray[index];
+  }
+  double TotAverage = arraySum / (len - 1);
+  return TotAverage;
+}
+void StartScan(unsigned int start , byte Step) {
+
+  myservo.write(start);
+  delay(100);
+  byte i = 0;
+  byte Finish = start + Step * 10;
+  for (pos = start; pos <= Finish; pos = pos + Step) {
+
+    myservo.write(pos);
+    delay(5);
+    x = ReadDistance();
+    myArray[i] = x;
+    i++;
+
+  }
+
+
+
+
+}
+void requestEvent() {
+
+  Wire.write(var); // respond with message of 6 bytes
+  Wire.write(Turn);
+  // Wire.endTransmission():
+  // as expected by master
 }
