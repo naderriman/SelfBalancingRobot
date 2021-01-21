@@ -209,12 +209,7 @@ void loop() {
     TurnRate=0;
     
   }
-  //  else if (current - initialTime > 8000 && current - initialTime < 8500) {
-  //    TurnRate = -1.2;
-  //  }
-  //  else if (pulseReq - Nopulses > 1 && current - initialTime > 9000 && current - initialTime < 16000) {
-  //    VelRef = -6000;
-  //  }
+
 //  pulseReq - Nopulses > 1 &&
   else if( var==0){
     VelRef = -3000;
