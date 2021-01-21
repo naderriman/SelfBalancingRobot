@@ -12,6 +12,6 @@ After perfecting the velocity, i worked on implementing the steering, which work
 
 At this stage the robot is fully functioning and I further tested it's dynamics by adding an RC receiver and controlled it with an RC controller.
 
-While developping the robot I was working in parallel on a LIDAR sensor equivalent. I bought a ToF laser sensor (Tof 10120) and mounted it on a servo (mg90s). The sensor is calibrated by checking the data and creating a 2D LIDAR map on PYTHON. ![alt text](https://github.com/[naderriman]/[SelfBalancingRobot]/blob/[main]/delay20.png)
+While developping the robot I was working in parallel on a LIDAR sensor equivalent. I bought a ToF laser sensor (Tof 10120) and mounted it on a servo (mg90s). The sensor is calibrated by checking the data and creating a 2D LIDAR map on PYTHON. ![alt text](https://github.com/naderriman/SelfBalancingRobot/blob/main/delay20.png)
 
 This sensor is interfaced on another Arduino (UNO), the calculations are made on the arduino and the data is sent to the Arduino MEGA through I2C communication.
